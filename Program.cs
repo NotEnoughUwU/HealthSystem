@@ -15,6 +15,7 @@ namespace Health_System
         static string name;
         //Health system variables
         static int health;
+        static int defaultHealth;
         static int maxHealth;
         //Weapon system variables
         static int weaponNum;
@@ -22,26 +23,47 @@ namespace Health_System
         static int weaponDamage;
         //Armour system variables
         static int armour;
+        static int defaultArmour;
         static int maxArmour;
         //Experience system variables
         static int level;
         static int maxLevel;
         static int exp;
         static int maxExp;
+        //Lives system variables
+        static int lives;
+        static int defaultLives;
+        static int maxLives;
 
-        static void Main(string[] args)
+        static OrderedDictionary Enemy;
+
+        static void Main()
+        {
+            InitValues();
+            ShowHud();
+
+            Console.ReadKey(true); 
+        }
+
+        static void InitValues()
         {
             initState = true;
 
             rnd = new Random();
 
-            health = 100;
+            defaultHealth = 100;
+            health = defaultHealth;
             maxHealth = 150;
 
             weaponNum = 0;
             GetWeapon(weaponNum);
 
-            armour = 100;
+            defaultLives = 3;
+            lives = defaultLives;
+            maxLives = 9;
+
+            defaultArmour = 100;
+            armour = defaultArmour;
             maxArmour = 150;
 
             level = 1;
@@ -53,9 +75,7 @@ namespace Health_System
 
             initState = false;
 
-            ShowHud();
-
-            Console.ReadKey(true); 
+            Enemy = new OrderedDictionary();
         }
 
         static string GetPlayerName()
@@ -73,6 +93,7 @@ namespace Health_System
             Console.WriteLine("| Level: " + level + " | Exp: " + exp + " |");
             Console.WriteLine("| Health: " + health +" | Armour: " + armour + " |");
             Console.WriteLine("| Weapon: " + weaponName + " | Strength: " + weaponDamage + " |");
+            Console.WriteLine("| Currently fighting: " + Enemy["name"]);
         }
 
         static void GetWeapon(int randomNum = 99)
@@ -141,8 +162,16 @@ namespace Health_System
                 return "tip top shape";
             else if (health >= 101 && health <= 150)
                 return "overcharge";
-            else
+            else if (health >= 151)
+            {
+                health = 150;
+                return "error: invalid health value, reducing health to " + maxHealth;
+            }   
+            else if (health <= 0)
                 return "dead";
+
+            health = defaultHealth;
+            return "error: invalid health value, setting health to " + defaultHealth;
         }
 
         static string GetArmourStatus()
@@ -159,8 +188,16 @@ namespace Health_System
                 return "in perfect condition";
             else if (armour >= 101 && armour <= 150)
                 return "stronger than steel";
-            else
+            else if (health >= 151)
+            {
+                health = 150;
+                return "error: invalid armour value, reducing armour to " + maxArmour;
+            }
+            else if (health <= 0)
                 return "destroyed";
+
+            armour = defaultArmour;
+            return "error: invalid armour value, setting armour to " + defaultArmour;
         }
 
         static void CheckIfLevelUp()
@@ -197,10 +234,17 @@ namespace Health_System
         {
             level++;
             Console.WriteLine(name + " gained a level!");
+            Console.WriteLine(name + " is now level " + level);
         }
 
         static void TakeDamage(int enemyDamage)
         {
+            if (enemyDamage < 0)
+            {
+                Console.WriteLine("error: invalid damage value, setting damage to 0");
+                enemyDamage = 0;
+            }
+
             if (armour > 0)
             {
                 armour -= enemyDamage;
@@ -226,14 +270,18 @@ namespace Health_System
 
         static void Heal(int healAmount)
         {
+            if (healAmount < 0)
+            {
+                Console.WriteLine("error: invalid heal value, setting heal amount to 0");
+                healAmount = 0;
+            }
+
             Console.WriteLine(name + " healed " + healAmount + "!");
             Console.WriteLine(name + " is in " + GetHealthStatus() + "!");
         }
 
         static OrderedDictionary DecideEnemy()
         {
-            OrderedDictionary Enemy = new OrderedDictionary();
-
             OrderedDictionary[] Enemies = new OrderedDictionary[]
             {
                 new OrderedDictionary()
@@ -271,6 +319,73 @@ namespace Health_System
                 enemyDontShowAt = (int)Enemy["dontShowAt"];
             }
             return Enemy;
+        }
+
+        static void EnemyAttack()
+        {
+            Console.WriteLine("The " + (string)Enemy["name"] + " attacks!");
+            TakeDamage((int)Enemy["attack"]);
+        }
+
+        static void EnemyTakeDamage(int playerDamage)
+        {
+            if (playerDamage < 0)
+            {
+                Console.WriteLine("error: invalid damage value, setting damage to 0");
+                playerDamage = 0;
+            }
+            health -= playerDamage;
+            Console.WriteLine((string)Enemy["name"] + " took " + playerDamage + " damage!");
+
+            EnemyDeathCheck();
+        }
+
+        static void EnemyDeathCheck()
+        {
+            if ((int)Enemy["health"] <= 0)
+                EnemyDie();
+        }
+
+        static void EnemyDie()
+        {
+
+        }
+
+        static void PlayerAttack()
+        {
+            Console.WriteLine(name + " attacks!");
+            EnemyTakeDamage(weaponDamage);
+        }
+
+        static void DeathCheck()
+        {
+            if (health <= 0)
+            {
+                Die();
+                GameOverCheck();
+            }
+        }
+
+        static void Die()
+        {
+            Console.WriteLine(name + " died!");
+            lives--;
+            Console.WriteLine(lives + "lives left");
+        }
+
+        static void GameOverCheck()
+        {
+            if (lives <= 0)
+            {
+                GameOver();
+            }
+        }
+
+        static void GameOver()
+        {
+            Console.WriteLine("GAME OVER");
+            Console.ReadKey(true);
+            Main();
         }
     }
 }
