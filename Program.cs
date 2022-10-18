@@ -306,7 +306,7 @@ namespace Health_System
             Console.WriteLine(name + " healed " + healAmount + "!");
 
             health += healAmount;
-            if (health > 150)
+            if (health > maxHealth)
             {
                 Console.WriteLine("Maximum health reached! Reducing health to " + maxHealth);
                 Console.ReadKey(true);
@@ -342,7 +342,7 @@ namespace Health_System
             Console.ReadKey(true);
 
             armour += healAmount;
-            if (armour > 150)
+            if (armour > maxArmour)
             {
                 Console.WriteLine("Maximum armour reached! Reducing armour to " + maxArmour);
 
@@ -391,15 +391,15 @@ namespace Health_System
 
         static void EnemyAttack()
         {
-            Console.WriteLine("The " + Enemy[0] + " attacks!");
+            Console.WriteLine("The " + Enemy["name"] + " attacks!");
             Console.ReadKey(true);
-            TakeDamage((int)Enemy[1]);
+            TakeDamage((int)Enemy["attack"]);
         }
 
         static void EnemyTakeDamage(int playerDamage)
         {
 
-            Console.WriteLine("Debug: the " + Enemy[0] + " is about to take " + playerDamage + " damage");
+            Console.WriteLine("Debug: the " + Enemy["name"] + " is about to take " + playerDamage + " damage");
             Console.ReadKey(true);
 
             if (playerDamage < 0)
@@ -409,12 +409,12 @@ namespace Health_System
                 Console.ReadKey(true);
             }
             
-            int currentHealth = (int)Enemy[1];
+            int currentHealth = (int)Enemy[""];
             currentHealth -= playerDamage;
-            Enemy[1] = currentHealth;
+            Enemy["health"] = currentHealth;
             //for some reason, int casts cannot be subtracted from, and the enemy's health cannot be subtracted from but instead must be set with an = with no other operands involved
 
-            Console.WriteLine("The " + Enemy[0] + " took " + playerDamage + " damage!");
+            Console.WriteLine("The " + Enemy["name"] + " took " + playerDamage + " damage!");
             Console.ReadKey(true);
 
             EnemyDeathCheck();
@@ -422,13 +422,13 @@ namespace Health_System
 
         static void EnemyDeathCheck()
         {
-            if ((int)Enemy[1] <= 0)
+            if ((int)Enemy["health"] <= 0)
                 EnemyDie();
         }
 
         static void EnemyDie()
         {
-            Console.WriteLine("The " + Enemy[0] + " died!");
+            Console.WriteLine("The " + Enemy["name"] + " died!");
             Console.ReadKey(true);
 
             Enemy = new OrderedDictionary();
@@ -488,7 +488,7 @@ namespace Health_System
                 Console.ReadKey(true);
             
             Enemy = DecideEnemy();
-            Console.WriteLine("A " + Enemy[0] + " appeared!");
+            Console.WriteLine("A " + Enemy["name"] + " appeared!");
             Console.ReadKey(true);
         }
 
