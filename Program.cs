@@ -25,11 +25,6 @@ namespace Health_System
         static int armour;
         static int defaultArmour;
         static int maxArmour;
-        //Experience system variables
-        static int level;
-        static int maxLevel;
-        static int exp;
-        static int maxExp;
         //Lives system variables
         static int lives;
         static int defaultLives;
@@ -42,7 +37,62 @@ namespace Health_System
             InitValues();
             ShowHud();
 
-            Console.ReadKey(true); 
+            DebugSequence();
+
+            Console.ReadKey(true);
+        }
+
+        static void DebugSequence()
+        {
+            Console.WriteLine("Testing spawning a random enemy");
+            SpawnEnemy();
+            ShowHud();
+            Console.WriteLine("Testing default enemy attack");
+            EnemyAttack();
+            ShowHud();
+            Console.WriteLine("Testing negative 420 damage to player");
+            TakeDamage(-420);
+            ShowHud();
+            Console.WriteLine("Testing default player attack");
+            PlayerAttack();
+            ShowHud();
+            Console.WriteLine("Testing negative 69 damage to enemy");
+            EnemyTakeDamage(-69);
+            ShowHud();
+            Console.WriteLine("Testing enemy death");
+            EnemyDie();
+            ShowHud();
+            Console.WriteLine("Spawning super strong enemy for testing purposes");
+            Enemy = new OrderedDictionary()
+            {
+                {"name", "super goblin"},
+                {"health", 99999},
+                {"attack", 300}
+            };
+            Console.ReadKey(true);
+            ShowHud();
+            Console.WriteLine("Testing player being killed by an enemy");
+            EnemyAttack();
+            ShowHud();
+            Console.WriteLine("Testing heal item");
+            HealItem();
+            ShowHud();
+            Console.WriteLine("Testing heal values of negative 666 for health and armour");
+            Heal(-666);
+            ShowHud();
+            ArmourHeal(-666);
+            ShowHud();
+            Console.WriteLine("Testing healing the absurd amount of 500 to armour");
+            ArmourHeal(500);
+            ShowHud();
+            Console.WriteLine("Testing picking up a life item");
+            LifeItem();
+            ShowHud();
+            Console.WriteLine("Testing picking up a random weapon");
+            GetWeapon();
+            ShowHud();
+            Console.WriteLine("Testing game over; result should be restarting of debug sequence");
+            GameOver();
         }
 
         static void InitValues()
@@ -66,11 +116,6 @@ namespace Health_System
             armour = defaultArmour;
             maxArmour = 150;
 
-            level = 1;
-            maxLevel = 10;
-            exp = 0;
-            maxExp = 50000;
-
             name = GetPlayerName();
 
             initState = false;
@@ -90,10 +135,13 @@ namespace Health_System
 
             Console.WriteLine("{ Totally Real Game That Exists }");
             Console.WriteLine("| Name: " + name + " |");
-            Console.WriteLine("| Level: " + level + " | Exp: " + exp + " |");
-            Console.WriteLine("| Health: " + health +" | Armour: " + armour + " |");
+            Console.WriteLine("| Lives: " + lives);
+            Console.WriteLine("| Health: " + health + " | Status: " + GetHealthStatus() + " |");
+            Console.WriteLine("| Armour: " + armour + " | Status: " + GetArmourStatus() + " |");
             Console.WriteLine("| Weapon: " + weaponName + " | Strength: " + weaponDamage + " |");
-            Console.WriteLine("| Currently fighting: " + Enemy["name"]);
+            Console.WriteLine("| Currently fighting: " + Enemy["name"] + " |");
+
+            Console.ReadKey(true);
         }
 
         static void GetWeapon(int randomNum = 99)
@@ -145,6 +193,7 @@ namespace Health_System
             if (!initState)
             {
                 Console.WriteLine(name + " found a " + weaponName + "!");
+                Console.ReadKey(true);
             }
         }
 
@@ -159,19 +208,21 @@ namespace Health_System
             else if (health >= 51 && health <= 75)
                 return "mild discomfort";
             else if (health >= 76 && health <= 99)
+                return "great shape";
+            else if (health == 100)
                 return "tip top shape";
             else if (health >= 101 && health <= 150)
                 return "overcharge";
             else if (health >= 151)
             {
                 health = 150;
-                return "error: invalid health value, reducing health to " + maxHealth;
-            }   
+                return "Error: invalid health value, reducing health to " + maxHealth;
+            }
             else if (health <= 0)
-                return "dead";
+                return "a better place";
 
             health = defaultHealth;
-            return "error: invalid health value, setting health to " + defaultHealth;
+            return "Error: invalid health value, setting health to " + defaultHealth;
         }
 
         static string GetArmourStatus()
@@ -185,70 +236,40 @@ namespace Health_System
             else if (armour >= 51 && armour <= 75)
                 return "lightly battered";
             else if (armour >= 76 && armour <= 99)
-                return "in perfect condition";
+                return "in near perfect condition";
+            else if (armour == 100)
+                return "undamaged";
             else if (armour >= 101 && armour <= 150)
                 return "stronger than steel";
             else if (health >= 151)
             {
-                health = 150;
-                return "error: invalid armour value, reducing armour to " + maxArmour;
+                armour = 150;
+                return "Error: invalid armour value, reducing armour to " + maxArmour;
             }
-            else if (health <= 0)
+            else if (armour <= 0)
                 return "destroyed";
 
             armour = defaultArmour;
-            return "error: invalid armour value, setting armour to " + defaultArmour;
-        }
-
-        static void CheckIfLevelUp()
-        {
-            int[] expToLevelUpByLevel =
-            {
-                100,
-                300,
-                800,
-                1600,
-                3000,
-                6000,
-                12500,
-                25000,
-                50000
-            };
-            int levelToBecome = 0;
-
-            foreach (int expAmount in expToLevelUpByLevel)
-            {
-                if (exp >= Array.IndexOf(expToLevelUpByLevel, expAmount))
-                    levelToBecome++;
-                else
-                    break;
-            }
-
-            if (levelToBecome != 0)
-            {
-                LevelUp();
-            }
-        }
-
-        static void LevelUp()
-        {
-            level++;
-            Console.WriteLine(name + " gained a level!");
-            Console.WriteLine(name + " is now level " + level);
+            return "Error: invalid armour value, setting armour to " + defaultArmour;
         }
 
         static void TakeDamage(int enemyDamage)
         {
+            Console.WriteLine("Debug: " + name + " is about to take " + enemyDamage + " damage");
+            Console.ReadKey(true);
+
             if (enemyDamage < 0)
             {
-                Console.WriteLine("error: invalid damage value, setting damage to 0");
+                Console.WriteLine("Error: invalid damage value, setting damage to 0");
                 enemyDamage = 0;
+                Console.ReadKey(true);
             }
 
             if (armour > 0)
             {
                 armour -= enemyDamage;
                 Console.WriteLine(name + " took " + enemyDamage + " damage!");
+                Console.ReadKey(true);
                 Console.WriteLine(name + "'s armour is " + GetArmourStatus() + "!");
 
                 if (armour < 0)
@@ -257,27 +278,87 @@ namespace Health_System
                     armour = 0;
                     Console.WriteLine(name + " is in " + GetHealthStatus() + "!");
                 }
+                Console.ReadKey(true);
             }
             else
             {
                 health -= enemyDamage;
                 Console.WriteLine(name + " took " + enemyDamage + " damage!");
                 Console.WriteLine(name + " is in " + GetHealthStatus() + "!");
-
-                //DeathCheck();
+                Console.ReadKey(true);
             }
+
+            DeathCheck();
         }
 
         static void Heal(int healAmount)
         {
+            Console.WriteLine("Debug: " + name + " is about to heal " + healAmount + " health");
+            Console.ReadKey(true);
+
             if (healAmount < 0)
             {
-                Console.WriteLine("error: invalid heal value, setting heal amount to 0");
+                Console.WriteLine("Error: invalid heal value, setting heal amount to 0");
                 healAmount = 0;
+                Console.ReadKey(true);
             }
 
             Console.WriteLine(name + " healed " + healAmount + "!");
+
+            health += healAmount;
+            if (health > 150)
+            {
+                Console.WriteLine("Maximum health reached! Reducing health to " + maxHealth);
+                Console.ReadKey(true);
+
+                health = maxHealth;
+                Console.ReadKey(true);
+            }
+ 
             Console.WriteLine(name + " is in " + GetHealthStatus() + "!");
+            Console.ReadKey(true);
+        }
+
+        static void HealItem()
+        {
+            Console.WriteLine(name + " picked up a health item!");
+            Console.ReadKey(true);
+            Heal(50);
+        }
+
+        static void ArmourHeal(int healAmount)
+        {
+            Console.WriteLine("Debug: " + name + " is about to heal " + healAmount + " armour");
+            Console.ReadKey(true);
+
+            if (healAmount < 0)
+            {
+                Console.WriteLine("Error: invalid heal value, setting heal amount to 0");
+                healAmount = 0;
+                Console.ReadKey(true);
+            }
+
+            Console.WriteLine(name + " healed " + healAmount + " armour!");
+            Console.ReadKey(true);
+
+            armour += healAmount;
+            if (armour > 150)
+            {
+                Console.WriteLine("Maximum armour reached! Reducing armour to " + maxArmour);
+
+                armour = maxArmour;
+                Console.ReadKey(true);
+            }
+
+            Console.WriteLine(name + "'s armour is " + GetArmourStatus() + "!");
+            Console.ReadKey(true);
+        }
+
+        static void ArmourHealItem()
+        {
+            Console.WriteLine(name + " picked up an armour item!");
+            Console.ReadKey(true);
+            ArmourHeal(50);
         }
 
         static OrderedDictionary DecideEnemy()
@@ -288,72 +369,133 @@ namespace Health_System
                 {
                     {"name", "goblin"},
                     {"health", 30},
-                    {"attack", 15},
-                    {"showAt", 1},
-                    {"dontShowAt", 3}
+                    {"attack", 15}
                 },
                 new OrderedDictionary()
                 {
                     {"name", "skeleton"},
                     {"health", 20},
-                    {"attack", 20},
-                    {"showAt", 1},
-                    {"dontShowAt", 3}
+                    {"attack", 20}
                 },
                 new OrderedDictionary()
                 {
                     {"name", "troll"},
                     {"health", 40},
-                    {"attack", 25},
-                    {"showAt", 2},
-                    {"dontShowAt", 4}
+                    {"attack", 25}
                 }
             };
 
-            int enemyShowAt = 99;
-            int enemyDontShowAt = 99;
-            while (enemyShowAt <= level && enemyDontShowAt >= level)
-            {
-                Enemy = Enemies[rnd.Next(Enemy.Count)];
-                enemyShowAt = (int)Enemy["showAt"];
-                enemyDontShowAt = (int)Enemy["dontShowAt"];
-            }
+            Enemy = Enemies[rnd.Next(Enemies.Count())];
             return Enemy;
         }
 
         static void EnemyAttack()
         {
-            Console.WriteLine("The " + (string)Enemy["name"] + " attacks!");
-            TakeDamage((int)Enemy["attack"]);
+            Console.WriteLine("The " + Enemy[0] + " attacks!");
+            Console.ReadKey(true);
+            TakeDamage((int)Enemy[1]);
         }
 
         static void EnemyTakeDamage(int playerDamage)
         {
+
+            Console.WriteLine("Debug: the " + Enemy[0] + " is about to take " + playerDamage + " damage");
+            Console.ReadKey(true);
+
             if (playerDamage < 0)
             {
-                Console.WriteLine("error: invalid damage value, setting damage to 0");
+                Console.WriteLine("Error: invalid damage value, setting damage to 0");
                 playerDamage = 0;
+                Console.ReadKey(true);
             }
-            health -= playerDamage;
-            Console.WriteLine((string)Enemy["name"] + " took " + playerDamage + " damage!");
+            
+            int currentHealth = (int)Enemy[1];
+            currentHealth -= playerDamage;
+            Enemy[1] = currentHealth;
+            //for some reason, int casts cannot be subtracted from, and the enemy's health cannot be subtracted from but instead must be set with an = with no other operands involved
+
+            Console.WriteLine("The " + Enemy[0] + " took " + playerDamage + " damage!");
+            Console.ReadKey(true);
 
             EnemyDeathCheck();
         }
 
         static void EnemyDeathCheck()
         {
-            if ((int)Enemy["health"] <= 0)
+            if ((int)Enemy[1] <= 0)
                 EnemyDie();
         }
 
         static void EnemyDie()
         {
+            Console.WriteLine("The " + Enemy[0] + " died!");
+            Console.ReadKey(true);
 
+            Enemy = new OrderedDictionary();
+        }
+
+        static void DropItem()
+        {
+            switch (rnd.Next(0, 11))
+            {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    break;
+                case 4:
+                case 5:
+                    HealItem();
+                    break;
+                case 6:
+                case 7:
+                    ArmourHealItem();
+                    break;
+                case 8:
+                    LifeItem();
+                    break;
+                case 9:
+                case 10:
+                    GetWeapon();
+                    break;
+            }
+        }
+
+        static void LifeItem()
+        {
+            Console.WriteLine(name + " picked up a life item!");
+            Console.ReadKey(true);
+            LifeUp(1);
+        }
+
+        static void LifeUp(int lifeIncrease)
+        {
+            lives += lifeIncrease;
+            
+            if (lives > maxLives)
+            {
+                Console.WriteLine("Maximum lives reached! Lives set to " + maxLives);
+                lives = maxLives;
+                Console.ReadKey(true);
+            }
+            Console.WriteLine(name + " now has " + lives + " lives");
+            Console.ReadKey(true);
+        }
+
+        static void SpawnEnemy()
+        {
+            if (Enemy == null)
+                Console.ReadKey(true);
+            
+            Enemy = DecideEnemy();
+            Console.WriteLine("A " + Enemy[0] + " appeared!");
+            Console.ReadKey(true);
         }
 
         static void PlayerAttack()
         {
             Console.WriteLine(name + " attacks!");
+            Console.ReadKey(true);
             EnemyTakeDamage(weaponDamage);
         }
 
@@ -369,8 +511,18 @@ namespace Health_System
         static void Die()
         {
             Console.WriteLine(name + " died!");
+            Console.ReadKey(true);
             lives--;
-            Console.WriteLine(lives + "lives left");
+            Console.WriteLine(name + " has " + lives + " lives left");
+            Console.ReadKey(true);
+            GameOverCheck();
+            Respawn();
+        }
+
+        static void Respawn()
+        {
+            health = defaultArmour;
+            armour = defaultArmour;
         }
 
         static void GameOverCheck()
@@ -385,6 +537,7 @@ namespace Health_System
         {
             Console.WriteLine("GAME OVER");
             Console.ReadKey(true);
+            Console.Clear();
             Main();
         }
     }
